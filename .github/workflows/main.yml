@@ -17,7 +17,6 @@ on:
         options:
           - create-resource-group
 permissions:
-  id-token: write
   contents: read
   
 jobs:
