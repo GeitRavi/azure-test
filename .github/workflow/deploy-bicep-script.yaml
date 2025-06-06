@@ -1,0 +1,40 @@
+name: Conditional Azure Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        type: choice
+        description: "Choose environment"
+        required: true
+        options:
+          - Test
+          - Prod
+      operation:
+        type: choice
+        description: "Operation to perform"
+        required: true
+        options:
+          - create-resource-group
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Deploy Bicep if operation is create-resource-group
+      if: inputs.operation == 'create-resource-group'
+      run: |
+        az deployment group create --resource-group rg-azure-testing-${{ inputs.env }} --template-file src/rg/main-rg.bicep --parameters location=eastus
