@@ -1,11 +1,11 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "metadata": {
     "_generator": {
       "name": "bicep",
       "version": "0.36.1.42791",
-      "templateHash": "15796728643549250633"
+      "templateHash": "8598847471754382213"
     }
   },
   "parameters": {
@@ -29,8 +29,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "[format('rg-{0}-001', parameters('resourceGroupName'))]",
-      "subscriptionId": "[subscription().subscriptionId]",
-      "location": "[resourceGroup().location]",
+      "location": "[deployment().location]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
