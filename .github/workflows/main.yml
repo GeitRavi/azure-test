@@ -40,4 +40,5 @@ jobs:
     - name: Deploy Bicep if operation is create-resource-group
       if: inputs.operation == 'create-resource-group'
       run: |
-        az deployment sub what-if --name create-rg-deployment  --subscription {{ secret.AZURE_SUBSCRIPTION_ID }} --template-file src/rg/main-rg.bicep --parameters resourceGroupName='rg-azure-testing-${{ inputs.env }}' location='eastus'
+        SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+        az deployment sub what-if --name create-rg-deployment --location eastus --subscription $SUBSCRIPTION_ID --template-file src/rg/main-rg.bicep --parameters resourceGroupName='rg-azure-testing-${{ inputs.env }}' location='eastus'
