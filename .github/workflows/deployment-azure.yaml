@@ -47,13 +47,13 @@ jobs:
       - name: Build Jekyll site
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ${{ env.DOC_DIR }}
-          destination: ${{ env.DIST_DIR }}
+          source: ${{ env.DOC_DIR }}/main-rg.json
+          destination: ${{ env.DIST_DIR }}/main-rg.json
 
       - name: Upload artifact for Pages
         uses: actions/upload-pages-artifact@v1
         with:
-          path: ${{ env.DIST_DIR }}
+          path: ${{ env.DIST_DIR }}/main-rg.json
 
       - name: Deploy to GitHub Pages
         id: deployment
