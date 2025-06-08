@@ -1,60 +1,60 @@
-name: Azure Deployment to GitHub Pages
+name: Build and Deploy Jekyll Site with Bicep JSON
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
-    inputs:
-      env:
-        type: choice
-        description: "Choose environment"
-        required: true
-        options:
-          - Test
-          - Prod
-
-env:
-  DIST_DIR: dist
-  BICEP_FILES: src/rg/main-rg.bicep
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+env:
+  BICEP_FILES: src/rg/main-rg.bicep
+  DOC_DIR: doc
+  DIST_DIR: _site
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        auth-type: SERVICE_PRINCIPAL
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          auth-type: SERVICE_PRINCIPAL
 
-    - name: Install Bicep CLI & Build files
-      run: |
-        set -euo pipefail
-        az bicep install
-        mkdir -p $DIST_DIR
-        az bicep build --file "$BICEP_FILES" --outdir "$DIST_DIR"
+      - name: Install Bicep CLI & Build Bicep JSON
+        run: |
+          az bicep install
+          mkdir -p $DOC_DIR
+          az bicep build --file "$BICEP_FILES" --outdir "$DOC_DIR"
 
-    - name: Upload GitHub Pages artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: ${{ env.DIST_DIR }}
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
-    - name: Deploy to GitHub Pages
-      uses: actions/deploy-pages@v4
+      - name: Build Jekyll site
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ${{ env.DOC_DIR }}
+          destination: ${{ env.DIST_DIR }}
+
+      - name: Upload artifact for Pages
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ${{ env.DIST_DIR }}
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
