@@ -1,4 +1,4 @@
-name: Azure Deployment
+name: Azure Deployment to GitHub Pages
 
 on:
   workflow_dispatch:
@@ -16,18 +16,19 @@ env:
   BICEP_FILES: src/rg/main-rg.bicep
 
 permissions:
-  id-token: write
   contents: write
-  pages: write  # Required for GitHub Pages
+  pages: write
+  id-token: write
 
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.env }}
+    environment:
+      name: github-pages
 
     steps:
     - name: Checkout code
@@ -43,26 +44,17 @@ jobs:
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         auth-type: SERVICE_PRINCIPAL
 
-    - name: Install Bicep CLI & Build Bicep files
+    - name: Install Bicep CLI & Build files
       run: |
         set -euo pipefail
         az bicep install
         mkdir -p $DIST_DIR
         az bicep build --file "$BICEP_FILES" --outdir "$DIST_DIR"
 
-    - name: Upload static files as GitHub Pages artifact
+    - name: Upload GitHub Pages artifact
       uses: actions/upload-pages-artifact@v3
       with:
         path: ${{ env.DIST_DIR }}
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
     - name: Deploy to GitHub Pages
-      id: deployment
       uses: actions/deploy-pages@v4
