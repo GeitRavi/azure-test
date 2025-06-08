@@ -1,4 +1,4 @@
-name: Build and Deploy Jekyll Site with Bicep JSON
+name: azure deployment
 
 on:
   push:
