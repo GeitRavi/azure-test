@@ -1,4 +1,4 @@
-name: Conditional Azure Deployment
+name: Azure Deployment
 
 on:
   workflow_dispatch:
