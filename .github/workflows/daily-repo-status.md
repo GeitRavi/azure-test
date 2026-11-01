@@ -17,6 +17,10 @@ permissions:
   copilot-requests: none
 network: defaults
 
+engine:
+  id: copilot
+  model: gpt-5-mini
+
 tools:
   bash: ["cat", "ls", "find", "grep", "head", "tail", "wc"]
   github:
